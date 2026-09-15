@@ -431,6 +431,7 @@ pub enum Instruction {
     /// Supported on types:
     ///  - Native
     ///  - JubjubPoint
+    ///  - JubjubScalar
     ///  - Secp256k1Point
     ///  - Secp256k1Base
     ///  - Secp256k1Scalar
@@ -465,6 +466,7 @@ pub enum Instruction {
     /// Supported on types:
     ///  - Native
     ///  - JubjubPoint
+    ///  - JubjubScalar
     ///  - Secp256k1Point
     ///  - Secp256k1Base
     ///  - Secp256k1Scalar
@@ -864,6 +866,7 @@ pub enum Instruction {
     /// Supported on types:
     ///  - Native
     ///  - JubjubPoint
+    ///  - JubjubScalar
     ///  - Secp256k1Point
     ///  - Secp256k1Base
     ///  - Secp256k1Scalar
@@ -887,6 +890,7 @@ pub enum Instruction {
     /// Supported on types:
     ///  - Native
     ///  - JubjubPoint
+    ///  - JubjubScalar
     ///  - Secp256k1Point
     ///  - Secp256k1Base
     ///  - Secp256k1Scalar
@@ -909,6 +913,7 @@ pub enum Instruction {
     /// Multiplies `a` and `b`.
     /// Supported on types:
     ///  - Native
+    ///  - JubjubScalar
     ///  - Secp256k1Base
     ///  - Secp256k1Scalar
     ///  - Secp256r1Base
@@ -929,6 +934,7 @@ pub enum Instruction {
     /// Supported on types:
     ///  - Native
     ///  - JubjubPoint
+    ///  - JubjubScalar
     ///  - Secp256k1Point
     ///  - Secp256k1Base
     ///  - Secp256k1Scalar
@@ -949,6 +955,7 @@ pub enum Instruction {
     /// Inverts `a`, results in an error if `a` is zero.
     /// Supported on types:
     ///  - Native
+    ///  - JubjubScalar
     ///  - Secp256k1Base
     ///  - Secp256k1Scalar
     ///  - Secp256r1Base
