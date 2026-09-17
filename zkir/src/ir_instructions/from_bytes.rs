@@ -43,6 +43,8 @@ use crate::{
 ///
 /// Errors if the input is not a supported type.
 pub fn from_bytes_offcircuit(val_t: &IrType, bytes: &[u8]) -> Result<IrValue, anyhow::Error> {
+    // The deprecated `FromBytes32` instruction should only work for the output
+    // types listed in `ir.rs`.
     use IrValue::*;
 
     match val_t {
@@ -86,6 +88,8 @@ pub fn from_bytes_incircuit(
     val_t: &IrType,
     bytes: &[AssignedByte<F>],
 ) -> Result<CircuitValue, plonk::Error> {
+    // The deprecated `FromBytes32` instruction should only work for the output
+    // types listed in `ir.rs`.
     use CircuitValue::*;
 
     match val_t {

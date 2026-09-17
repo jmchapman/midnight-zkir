@@ -40,6 +40,8 @@ use crate::{
 ///
 /// Errors if the input is not a supported type.
 pub fn to_bytes_offcircuit(value: &IrValue) -> Result<IrValue, anyhow::Error> {
+    // The deprecated `IntoBytes32` instruction should only work for the input
+    // types listed in `ir.rs`.
     use IrValue::*;
     match value {
         Native(x) => Ok(Bytes(x.0.to_bytes_le().to_vec())),
@@ -85,6 +87,8 @@ pub fn to_bytes_incircuit(
     layouter: &mut impl Layouter<F>,
     value: &CircuitValue,
 ) -> Result<CircuitValue, plonk::Error> {
+    // The deprecated `IntoBytes32` instruction should only work for the input
+    // types listed in `ir.rs`.
     use CircuitValue::*;
     match value {
         Native(x) => std_lib

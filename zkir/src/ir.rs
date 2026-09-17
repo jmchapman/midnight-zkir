@@ -618,6 +618,25 @@ pub enum Instruction {
         /// The output variable name
         output: Identifier,
     },
+    /// ZKIR 3.0 version of `ToBytes` with a fixed-size 32-byte output.
+    ///
+    /// Supported on the prime-field types:
+    /// * Native
+    /// * Secp256k1Base
+    /// * Secp256k1Scalar
+    /// * Secp256r1Base
+    /// * Secp256r1Scalar
+    /// * Curve25519Base
+    /// * Curve25519Scalar
+    ///
+    /// **Deprecated:** this instruction is slated for removal and should not be
+    /// used in new circuits.  Use `ToBytes` instead.
+    IntoBytes32 {
+        /// The element to be converted
+        input: Operand,
+        /// The output variable name
+        output: Identifier,
+    },
     /// Constructs an element of the given type from a `Bytes(n)` of any
     /// length, interpreted as a little-endian integer and reduced modulo the
     /// field order.
@@ -636,6 +655,28 @@ pub enum Instruction {
     /// For inputs representing an integer below the field order, `ToBytes`
     /// inverts `FromBytes` up to zero-padding to 32 bytes.
     FromBytes {
+        /// The input bytes
+        bytes: Operand,
+        /// The type to be converted into
+        #[serde(rename = "type")]
+        val_t: IrType,
+        /// The output variable name
+        output: Identifier,
+    },
+    /// ZKIR 3.0 version of `FromBytes` with a fixed size 32-byte input.
+    ///
+    /// Supported on the prime-field types:
+    /// * Native
+    /// * Secp256k1Base
+    /// * Secp256k1Scalar
+    /// * Secp256r1Base
+    /// * Secp256r1Scalar
+    /// * Curve25519Base
+    /// * Curve25519Scalar
+    ///
+    /// **Deprecated:** this instruction is slated for removal and should not be
+    /// used in new circuits.  Use `FromBytes` instead.
+    FromBytes32 {
         /// The input bytes
         bytes: Operand,
         /// The type to be converted into
