@@ -644,7 +644,9 @@ impl IrSource {
                     let p = from_coordinates_offcircuit(&x, &y)?;
                     memory.insert(output.clone(), p);
                 }
-                I::ToBytes { input, output } => {
+                I::ToBytes { input, output } | I::IntoBytes32 { input, output } => {
+                    // The deprecated `IntoBytes32` instruction should only work
+                    // for the input types listed in `ir.rs`.
                     let x = resolve_operand(&memory, input)?;
                     let bytes = to_bytes_offcircuit(&x)?;
                     memory.insert(output.clone(), bytes);
@@ -653,7 +655,14 @@ impl IrSource {
                     val_t,
                     bytes,
                     output,
+                }
+                | I::FromBytes32 {
+                    val_t,
+                    bytes,
+                    output,
                 } => {
+                    // The deprecated `FromBytes32` instruction should only work
+                    // for the output types listed in `ir.rs`.
                     let bytes: Vec<u8> = resolve_operand(&memory, bytes)?.try_into()?;
                     let x = from_bytes_offcircuit(val_t, &bytes)?;
                     memory.insert(output.clone(), x);
@@ -1284,7 +1293,9 @@ impl Relation for IrSource {
                     let p = from_coordinates_incircuit(std, layouter, &x, &y)?;
                     mem_insert(output.clone(), p, &mut memory)?;
                 }
-                I::ToBytes { input, output } => {
+                I::ToBytes { input, output } | I::IntoBytes32 { input, output } => {
+                    // The deprecated `IntoBytes32` instruction should only work
+                    // for the input types listed in `ir.rs`.
                     let x = resolve_operand(std, layouter, &memory, input)?;
                     let bytes = to_bytes_incircuit(std, layouter, &x)?;
                     mem_insert(output.clone(), bytes, &mut memory)?;
@@ -1293,7 +1304,14 @@ impl Relation for IrSource {
                     val_t,
                     bytes,
                     output,
+                }
+                | I::FromBytes32 {
+                    val_t,
+                    bytes,
+                    output,
                 } => {
+                    // The deprecated `FromBytes32` instruction should only work
+                    // for the output types listed in `ir.rs`.
                     let bytes: Vec<AssignedByte<outer::Scalar>> =
                         resolve_operand(std, layouter, &memory, bytes)?.try_into()?;
                     let x = from_bytes_incircuit(std, layouter, val_t, &bytes)?;
