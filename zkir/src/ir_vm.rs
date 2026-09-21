@@ -676,7 +676,9 @@ impl IrSource {
                     let x = from_bytes_offcircuit(val_t, &bytes)?;
                     memory.insert(output.clone(), x);
                 }
-                I::Reverse { bytes, output } => {
+                I::Reverse { bytes, output } | I::ReverseBytes { bytes, output } => {
+                    // The deprecated `ReverseBytes` instruction is the ZKIR 3.0
+                    // name of `Reverse` and behaves identically.
                     let bytes = resolve_operand(&memory, bytes)?;
                     let mut bytes: Vec<u8> = bytes.try_into()?;
                     bytes.reverse();
@@ -1340,7 +1342,9 @@ impl Relation for IrSource {
                     let x = from_bytes_incircuit(std, layouter, val_t, &bytes)?;
                     memory.insert(output.clone(), x);
                 }
-                I::Reverse { bytes, output } => {
+                I::Reverse { bytes, output } | I::ReverseBytes { bytes, output } => {
+                    // The deprecated `ReverseBytes` instruction is the ZKIR 3.0
+                    // name of `Reverse` and behaves identically.
                     let bytes = resolve_operand(std, layouter, &memory, bytes)?;
                     let mut bytes: Vec<AssignedByte<outer::Scalar>> = bytes.try_into()?;
                     bytes.reverse();
