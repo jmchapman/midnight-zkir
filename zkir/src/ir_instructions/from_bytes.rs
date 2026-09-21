@@ -137,52 +137,6 @@ pub fn from_bytes_incircuit(
     }
 }
 
-/// Fixed 32-byte wrappers around [`from_bytes_offcircuit`] and
-/// [`from_bytes_incircuit`], preserving the pre-generalization API.
-pub mod from_bytes32 {
-    use super::*;
-
-    /// Builds (off-circuit) a value of the given type from a 32-byte string,
-    /// supporting the same prime-field types as [`from_bytes_offcircuit`].
-    ///
-    /// The bytes are interpreted as a little-endian integer and reduced modulo
-    /// the field order.
-    ///
-    /// **Deprecated:** use [`from_bytes_offcircuit`] instead, which supports
-    /// byte strings of any length.
-    ///
-    /// # Errors
-    ///
-    /// Errors if the input is not a supported type.
-    pub fn from_bytes32_offcircuit(
-        val_t: &IrType,
-        bytes: &[u8; 32],
-    ) -> Result<IrValue, anyhow::Error> {
-        from_bytes_offcircuit(val_t, bytes)
-    }
-
-    /// Builds (in-circuit) a value of the given type from a 32-byte string,
-    /// supporting the same prime-field types as [`from_bytes_incircuit`].
-    ///
-    /// The bytes are interpreted as a little-endian integer and reduced modulo
-    /// the field order.
-    ///
-    /// **Deprecated:** use [`from_bytes_incircuit`] instead, which supports
-    /// byte strings of any length.
-    ///
-    /// # Errors
-    ///
-    /// Errors if the input is not a supported type.
-    pub fn from_bytes32_incircuit(
-        std_lib: &ZkStdLib,
-        layouter: &mut impl Layouter<F>,
-        val_t: &IrType,
-        bytes: &[AssignedByte<F>; 32],
-    ) -> Result<CircuitValue, plonk::Error> {
-        from_bytes_incircuit(std_lib, layouter, val_t, bytes)
-    }
-}
-
 /// Builds a prime field element from the given bytes by interpreting them
 /// in little-endian as an integer. The integer can be bigger than field order.
 pub(crate) fn from_le_bytes_with_reduction<F: CircuitField>(bytes: &[u8]) -> F {
@@ -303,29 +257,6 @@ mod tests {
             from_bytes_offcircuit(&IrType::Curve25519Scalar, &wide).unwrap(),
             IrValue::Curve25519Scalar(curve25519::Scalar::from_bytes_mod_order_wide(&wide))
         );
-    }
-
-    // The 32-byte wrappers behave identically to the generic functions for
-    // all supported prime-field types.
-    #[test]
-    fn test_from_bytes32_wrapper() {
-        use from_bytes32::from_bytes32_offcircuit;
-
-        let bytes = [0xffu8; 32];
-        for val_t in [
-            IrType::Native,
-            IrType::Secp256k1Base,
-            IrType::Secp256k1Scalar,
-            IrType::Secp256r1Base,
-            IrType::Secp256r1Scalar,
-            IrType::Curve25519Base,
-            IrType::Curve25519Scalar,
-        ] {
-            assert_eq!(
-                from_bytes32_offcircuit(&val_t, &bytes).unwrap(),
-                from_bytes_offcircuit(&val_t, &bytes).unwrap()
-            );
-        }
     }
 
     // Non-field types are rejected.
