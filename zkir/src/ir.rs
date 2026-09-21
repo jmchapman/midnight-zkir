@@ -647,6 +647,19 @@ pub enum Instruction {
         /// The output variable name
         output: Identifier,
     },
+    /// ZKIR 3.0 name of `Reverse`, with the same behavior: the input must be
+    /// of type `Bytes(n)`, otherwise this operation fails.
+    ///
+    /// Outputs 1 element, the reversed bytes
+    ///
+    /// **Deprecated:** this instruction is slated for removal and should not be
+    /// used in new circuits.  Use `Reverse` instead.
+    ReverseBytes {
+        /// The bytes to be reversed
+        bytes: Operand,
+        /// The output variable name
+        output: Identifier,
+    },
     /// Reverses the byte order of a `Bytes(n)` value.
     ///
     /// The input must be of type `Bytes(n)`, otherwise this operation fails. The
