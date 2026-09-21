@@ -610,6 +610,10 @@ pub enum Instruction {
     /// * Curve25519Base
     /// * Curve25519Scalar
     ///
+    /// The output is a `Bytes(32)`: unlike `ToBytes`, this instruction errors
+    /// off-circuit (and fails synthesis in-circuit) if the byte encoding of the
+    /// input is not exactly 32 bytes long.
+    ///
     /// **Deprecated:** this instruction is slated for removal and should not be
     /// used in new circuits.  Use `ToBytes` instead.
     IntoBytes32 {
@@ -628,6 +632,9 @@ pub enum Instruction {
     /// * Secp256r1Scalar
     /// * Curve25519Base
     /// * Curve25519Scalar
+    ///
+    /// The input must be a `Bytes(32)`: unlike `FromBytes`, byte strings of any
+    /// other length are rejected.
     ///
     /// **Deprecated:** this instruction is slated for removal and should not be
     /// used in new circuits.  Use `FromBytes` instead.
