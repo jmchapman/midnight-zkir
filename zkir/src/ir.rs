@@ -660,19 +660,6 @@ pub enum Instruction {
         /// The output variable name
         output: Identifier,
     },
-    /// Reverses the byte order of a `Bytes(n)` value.
-    ///
-    /// The input must be of type `Bytes(n)`, otherwise this operation fails. The
-    /// output is a `Bytes(n)` whose bytes are those of the input in reverse
-    /// order, i.e. the first byte becomes the last and vice versa.
-    ///
-    /// Outputs 1 element, the reversed bytes
-    Reverse {
-        /// The bytes to be reversed
-        bytes: Operand,
-        /// The output variable name
-        output: Identifier,
-    },
     /// Extracts a contiguous sub-slice of a `Bytes(n)` value, returning a
     /// `Bytes(len)`.
     ///
@@ -1152,6 +1139,19 @@ pub enum Instruction {
         /// The type to be converted into
         #[serde(rename = "type")]
         val_t: IrType,
+        /// The output variable name
+        output: Identifier,
+    },
+    /// Reverses the byte order of a `Bytes(n)` value.
+    ///
+    /// The input must be of type `Bytes(n)`, otherwise this operation fails. The
+    /// output is a `Bytes(n)` whose bytes are those of the input in reverse
+    /// order, i.e. the first byte becomes the last and vice versa.
+    ///
+    /// Outputs 1 element, the reversed bytes
+    Reverse {
+        /// The bytes to be reversed
+        bytes: Operand,
         /// The output variable name
         output: Identifier,
     },
