@@ -65,8 +65,9 @@ tag_enforcement_test!(ProverKey<IrSource>);
 #[repr(u8)]
 #[non_exhaustive]
 pub enum IrMinorVersion {
-    #[default]
     V0,
+    #[default]
+    V1,
 }
 
 impl Zkir for IrSource {
@@ -431,6 +432,7 @@ pub enum Instruction {
     /// Supported on types:
     ///  - Native
     ///  - JubjubPoint
+    ///  - JubjubScalar
     ///  - Secp256k1Point
     ///  - Secp256k1Base
     ///  - Secp256k1Scalar
@@ -465,6 +467,7 @@ pub enum Instruction {
     /// Supported on types:
     ///  - Native
     ///  - JubjubPoint
+    ///  - JubjubScalar
     ///  - Secp256k1Point
     ///  - Secp256k1Base
     ///  - Secp256k1Scalar
@@ -535,10 +538,15 @@ pub enum Instruction {
         /// The result of multiplication
         output: Identifier,
     },
-    /// Multiplies the group generator by a scalar.
+    /// Multiplies the group generator by a scalar. The curve is determined by
+    /// the scalar type:
+    ///  - `JubjubScalar`     producing a `JubjubPoint`
+    ///  - `Secp256k1Scalar`  producing a `Secp256k1Point`
+    ///  - `Secp256r1Scalar`  producing a `Secp256r1Point`
+    ///  - `Curve25519Scalar` producing a `Curve25519Point`
     ///
     /// This operation will result in an error if the operand given as `scalar`
-    /// is not of type `JubjubScalar`.
+    /// is not one of the above types.
     ///
     /// Outputs 1 element, the product
     EcMulGenerator {
@@ -591,9 +599,9 @@ pub enum Instruction {
         /// The output variable names
         output: Identifier,
     },
-    /// Transforms the given value into its 32-byte representation.
+    /// ZKIR 3.0 version of `ToBytes` with a fixed-size 32-byte output.
     ///
-    /// Supported on types:
+    /// Supported on the prime-field types:
     /// * Native
     /// * Secp256k1Base
     /// * Secp256k1Scalar
@@ -602,17 +610,21 @@ pub enum Instruction {
     /// * Curve25519Base
     /// * Curve25519Scalar
     ///
-    /// In all the above prime fields, the 32-byte representation is the little-endian
-    /// byte encoding of the underlying (canonical) integer.
+    /// The output is a `Bytes(32)`: unlike `ToBytes`, this instruction errors
+    /// off-circuit (and fails synthesis in-circuit) if the byte encoding of the
+    /// input is not exactly 32 bytes long.
+    ///
+    /// **Deprecated:** this instruction is slated for removal and should not be
+    /// used in new circuits.  Use `ToBytes` instead.
     IntoBytes32 {
         /// The element to be converted
         input: Operand,
         /// The output variable name
         output: Identifier,
     },
-    /// Constructs an element of the given type from its 32-byte representation.
+    /// ZKIR 3.0 version of `FromBytes` with a fixed size 32-byte input.
     ///
-    /// Supported on types:
+    /// Supported on the prime-field types:
     /// * Native
     /// * Secp256k1Base
     /// * Secp256k1Scalar
@@ -621,11 +633,11 @@ pub enum Instruction {
     /// * Curve25519Base
     /// * Curve25519Scalar
     ///
-    /// In all the above prime fields, the 32-byte representation is the little-endian
-    /// byte encoding of the underlying (canonical) integer.
+    /// The input must be a `Bytes(32)`: unlike `FromBytes`, byte strings of any
+    /// other length are rejected.
     ///
-    /// This operation also accepts non-canonical 32-byte representation in prime fields
-    /// by applying the relevant modular reduction.
+    /// **Deprecated:** this instruction is slated for removal and should not be
+    /// used in new circuits.  Use `FromBytes` instead.
     FromBytes32 {
         /// The input bytes
         bytes: Operand,
@@ -635,14 +647,14 @@ pub enum Instruction {
         /// The output variable name
         output: Identifier,
     },
-    /// Reverses the byte order of a `Bytes(n)` value.
-    ///
-    /// The input must be of type `Bytes(n)`, otherwise this operation fails. The
-    /// output is a `Bytes(n)` whose bytes are those of the input in reverse
-    /// order, i.e. the first byte becomes the last and vice versa.
+    /// ZKIR 3.0 name of `Reverse`, with the same behavior: the input must be
+    /// of type `Bytes(n)`, otherwise this operation fails.
     ///
     /// Outputs 1 element, the reversed bytes
-    Reverse {
+    ///
+    /// **Deprecated:** this instruction is slated for removal and should not be
+    /// used in new circuits.  Use `Reverse` instead.
+    ReverseBytes {
         /// The bytes to be reversed
         bytes: Operand,
         /// The output variable name
@@ -857,6 +869,7 @@ pub enum Instruction {
     /// Supported on types:
     ///  - Native
     ///  - JubjubPoint
+    ///  - JubjubScalar
     ///  - Secp256k1Point
     ///  - Secp256k1Base
     ///  - Secp256k1Scalar
@@ -880,6 +893,7 @@ pub enum Instruction {
     /// Supported on types:
     ///  - Native
     ///  - JubjubPoint
+    ///  - JubjubScalar
     ///  - Secp256k1Point
     ///  - Secp256k1Base
     ///  - Secp256k1Scalar
@@ -902,6 +916,7 @@ pub enum Instruction {
     /// Multiplies `a` and `b`.
     /// Supported on types:
     ///  - Native
+    ///  - JubjubScalar
     ///  - Secp256k1Base
     ///  - Secp256k1Scalar
     ///  - Secp256r1Base
@@ -922,6 +937,7 @@ pub enum Instruction {
     /// Supported on types:
     ///  - Native
     ///  - JubjubPoint
+    ///  - JubjubScalar
     ///  - Secp256k1Point
     ///  - Secp256k1Base
     ///  - Secp256k1Scalar
@@ -942,6 +958,7 @@ pub enum Instruction {
     /// Inverts `a`, results in an error if `a` is zero.
     /// Supported on types:
     ///  - Native
+    ///  - JubjubScalar
     ///  - Secp256k1Base
     ///  - Secp256k1Scalar
     ///  - Secp256r1Base
@@ -1079,6 +1096,65 @@ pub enum Instruction {
         /// The values returned, one per `IrSource::outputs[i]`.
         vals: Vec<Operand>,
     },
+    /// Transforms the given value into its fixed-size (32-byte)
+    /// representation, a `Bytes(32)`.
+    ///
+    /// Supported on the prime-field types:
+    /// * Native
+    /// * Secp256k1Base
+    /// * Secp256k1Scalar
+    /// * Secp256r1Base
+    /// * Secp256r1Scalar
+    /// * Curve25519Base
+    /// * Curve25519Scalar
+    ///
+    /// In all the above prime fields, the byte representation is the
+    /// little-endian byte encoding of the underlying (canonical) integer.
+    ToBytes {
+        /// The element to be converted
+        input: Operand,
+        /// The output variable name
+        output: Identifier,
+    },
+    /// Constructs an element of the given type from a `Bytes(n)` of any
+    /// length, interpreted as a little-endian integer and reduced modulo the
+    /// field order.
+    ///
+    /// Supported on the prime-field types:
+    /// * Native
+    /// * Secp256k1Base
+    /// * Secp256k1Scalar
+    /// * Secp256r1Base
+    /// * Secp256r1Scalar
+    /// * Curve25519Base
+    /// * Curve25519Scalar
+    ///
+    /// The modular reduction in particular allows reducing the 64-byte output
+    /// of a 512-bit hash into a `Curve25519Scalar`, as required by ed25519.
+    /// For inputs representing an integer below the field order, `ToBytes`
+    /// inverts `FromBytes` up to zero-padding to 32 bytes.
+    FromBytes {
+        /// The input bytes
+        bytes: Operand,
+        /// The type to be converted into
+        #[serde(rename = "type")]
+        val_t: IrType,
+        /// The output variable name
+        output: Identifier,
+    },
+    /// Reverses the byte order of a `Bytes(n)` value.
+    ///
+    /// The input must be of type `Bytes(n)`, otherwise this operation fails. The
+    /// output is a `Bytes(n)` whose bytes are those of the input in reverse
+    /// order, i.e. the first byte becomes the last and vice versa.
+    ///
+    /// Outputs 1 element, the reversed bytes
+    Reverse {
+        /// The bytes to be reversed
+        bytes: Operand,
+        /// The output variable name
+        output: Identifier,
+    },
 }
 tag_enforcement_test!(Instruction);
 
@@ -1130,7 +1206,7 @@ impl IrSource {
                 match ver {
                     SerdeVersion {
                         major: 3,
-                        minor: 0..=0,
+                        minor: 0..=1,
                     } => {
                         obj.insert(
                             "version".into(),
